@@ -63,14 +63,19 @@ if($_SESSION['result_op']=='agg')
 		$formatter1->formatBingJson($_SESSION['results'], $i*50);
 	}
 
-	// Ask Results
-	$arr=askParser::getAggeregatedSearchResults($q ,$_SESSION['results']);
-    $formatter1->addAskResults($arr);
 	// Instantate Aggregator
 	$aggregator1 = new aggregator(new resultSet());
-	// Send result sets 1,2 & 3 to Data Fusion Function
-	$aggregator1->dataFusion($api1->returnGoogleJsonResultFlag(), $api1->returnBingJsonResultFlag(), count($arr)>0, $formatter1->returnResultSet('resultSet1'), $formatter1->returnResultSet('resultSet2'), $formatter1->returnResultSet('resultSet3'),$_SESSION['results']);
-	// Print Agg Results
+
+        // Ask Results
+        if($_SESSION['type']!='image'){
+            $arr=askParser::getAggeregatedSearchResults($q ,$_SESSION['results']);
+            $formatter1->addAskResults($arr);
+        }
+
+        // Send result sets 1,2 & 3 to Data Fusion Function
+        $aggregator1->dataFusion($api1->returnGoogleJsonResultFlag(), $api1->returnBingJsonResultFlag(), (isset($arr) && count($arr)>0), $formatter1->returnResultSet('resultSet1'), $formatter1->returnResultSet('resultSet2'), $formatter1->returnResultSet('resultSet3'),$_SESSION['results']);
+
+        // Print Agg Results
 	$aggregator1->printResultSetAgg();
 	
 	// Query Timer
@@ -104,29 +109,35 @@ else if($_SESSION['result_op']=='nonAgg')
 	$formatter1->setBingJson($api1->returnBingJsonData(), $api1->returnBingJsonResultFlag());
 	$formatter1->formatBingJson(100, $_SESSION['offset']);
     
-    $arr=askParser::getAskSearchResultsByPage($q ,intval(($_SESSION['offset']/10)) + 1);
-    
-    $formatter1->addAskResults($arr);
-	
-	// Call Blekko API
-/*	$api1->blekkoApi($query3, 10, ((int)$_SESSION['offset']/10));
-	// Set BLEKKO JSON Data
-	$formatter1->setBlekkoJson($api1->returnBlekkoJsonData(), $api1->returnBlekkoJsonResultFlag());
-	$formatter1->formatBlekkoJson(100, $_SESSION['offset']);
-	*/ 
-	echo '<div class="row"><div class="span4"><h2>Google</h2>';
-	
-	// Display Google Results to Screen
-	$formatter1->printResultSet('resultSet1', $_SESSION['results']);
-	echo '</div><div class="span4"><h2>Bing</h2>';
-	
-	// Display Bing Results
-	$formatter1->printResultSet('resultSet2', $_SESSION['results']);
-	echo '</div><div class="span4"><h2>Ask</h2>';
-	
-	// Display Ask Results
-	$formatter1->printResultSet('resultSet3', $_SESSION['results']);
-	echo '</div></div> <!-- End of Class row -->';
+        // Ask Results
+        if($_SESSION['type']!='image'){
+            $arr=askParser::getAskSearchResultsByPage($q ,intval(($_SESSION['offset']/10)) + 1);
+
+            $formatter1->addAskResults($arr);
+            echo '<div class="row"><div class="span4"><h2>Google</h2>';
+
+            // Display Google Results to Screen
+            $formatter1->printResultSet('resultSet1', $_SESSION['results']);
+            echo '</div><div class="span4"><h2>Bing</h2>';
+
+            // Display Bing Results
+            $formatter1->printResultSet('resultSet2', $_SESSION['results']);
+            echo '</div><div class="span4"><h2>Ask</h2>';
+
+            // Display Ask Results
+            $formatter1->printResultSet('resultSet3', $_SESSION['results']);
+            echo '</div></div> <!-- End of Class row -->';
+        }  else {
+            echo '<div class="row"><div class="span6"><h2>Google</h2>';
+
+            // Display Google Results to Screen
+            $formatter1->printResultSet('resultSet1', $_SESSION['results']);
+            echo '</div><div class="span6"><h2>Bing</h2>';
+
+            // Display Bing Results
+            $formatter1->printResultSet('resultSet2', $_SESSION['results']);
+            echo '</div></div> <!-- End of Class row -->';
+        }
 	
 	// Query Timer
 	$time_post = microtime(true);
@@ -179,14 +190,18 @@ else if($_SESSION['result_op']=='clustered')
 			$formatter1->formatBingJson($_SESSION['results'], $i*50);
 		}
 
-		// Ask Results
-		$askArr=askParser::getAggeregatedSearchResults($q ,$_SESSION['results']);
-    	$formatter1->addAskResults($askArr);
-		
 		// Instantate Aggregator
 		$aggregator1 = new aggregator(new resultSet());
-		// Send result sets 1,2 & 3 to Data Fusion Function
-		$aggregator1->dataFusion($api1->returnGoogleJsonResultFlag(), $api1->returnBingJsonResultFlag(),count($askArr)>0,$formatter1->returnResultSet('resultSet1'), $formatter1->returnResultSet('resultSet2'), $formatter1->returnResultSet('resultSet3'));
+
+                // Ask Results
+                if($_SESSION['type']!='image'){
+                    $arr=askParser::getAggeregatedSearchResults($q ,$_SESSION['results']);
+                    $formatter1->addAskResults($arr);
+                }
+
+                // Send result sets 1,2 & 3 to Data Fusion Function
+                $aggregator1->dataFusion($api1->returnGoogleJsonResultFlag(), $api1->returnBingJsonResultFlag(), (isset($arr) && count($arr)>0), $formatter1->returnResultSet('resultSet1'), $formatter1->returnResultSet('resultSet2'), $formatter1->returnResultSet('resultSet3'),$_SESSION['results']);
+
 		
 		// Instantiate Cluster Object
 		$cluster1 = new cluster;

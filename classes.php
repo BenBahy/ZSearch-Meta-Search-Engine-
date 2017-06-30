@@ -719,33 +719,33 @@ class api
 	public function googleApi($q, $offset) {
 		
 		// Multiple keys available due to overcome limits of 100 queries per day per key
-		
+                //var_dump($offset);
+
 		// Google API key 1
-		$googleApiKey='AIzaSyDaDcmBjDUCAjc24BldgjWyg8q9XGXNrk4';
-		$id='004553691612569663192:yswazcgthyw';
+		//$googleApiKey='AIzaSyB-cD7zquUll6JEh70loVHd3GaBTSIcgKQ';
 		
 		// Google API key 2
-		//$googleApiKey='AIzaSyCzSaVpcOkrHS6FIB_0xDBynaz4vIcd6N0';
-		//$id='004553691612569663192:gd_zraf1v8w';
+		//$googleApiKey='AIzaSyDimuSeHydkOg1pyyO54Q3EVEGjPRdUfKM';
 		
 		// Google API key 3
-		//$googleApiKey='AIzaSyB7P8S4rrSCSsoJ1dBkU2Pdes97VbozrOU';
-		//$id='004553691612569663192:ijnh5euybl8';
+		//$googleApiKey='AIzaSyC-1kR2M8m2iJhnAXTwZXp8w3gks8x5YOA';
 		
 		// Google API key 4
-		//$googleApiKey='AIzaSyDznVCOSGLJcNZ9RAWSdRzOppatGhDUacE';
-		//$id='004553691612569663192:vhgi8oaqlaq';
+		//$googleApiKey='AIzaSyB8nKZMt6s6I3tDioe0lhJKBFX479Bj7-c';
 		
 		// Google API key 5
-		//$googleApiKey='AIzaSyANDTitlWV6aFPTGmtWsjhuggeVEs4XFBc';
-		//$id='004553691612569663192:g_hxag4ezoi';
+		//$googleApiKey='AIzaSyAvA447TaB5lFH_dkohICwoJEGvXYa0Mao';
 		
 		// Google API key 6
-		//$googleApiKey='AIzaSyAAGRUJM4PIBVnlB2VDa9aBrxzhSubMCjc';
-		//$id='004553691612569663192:g_nwnf3f7f8';
+		$googleApiKey='AIzaSyCBpYjocDnbupnAxbK6XqN5D-mrohReaIU';
 		
-		// Construct the link
-		$url='https://www.googleapis.com/customsearch/v1?'.'key='.$googleApiKey.'&cx='.$id.'&q='.$q.'&alt=json'.'&start='.$offset;
+                $id='005243230011887027180:95rpocypqje';
+
+		
+                // Construct the link
+		$url='https://www.googleapis.com/customsearch/v1?'.'key='.$googleApiKey.'&cx='.$id.'&q='.$q.'&alt=json'.'&start='.$offset.((isset($_SESSION['type']) && $_SESSION['type']=='image')?'&searchType=image':'');
+		//var_dump($url);
+                
 		// Clean spaces from the string
 		$url=str_replace(' ','%20',$url);
 		// initiate cURL
@@ -801,35 +801,29 @@ public function bingApi($q, $results, $offset) {
 
             // Keys
         $acctKey = 'b173d7c872b242d6a63e2ab0d4dd3891';
-        $rootUri = 'https://api.cognitive.microsoft.com/bing/v5.0/search';
+        $rootUri = 'https://api.cognitive.microsoft.com/bing/v5.0/'.((isset($_SESSION['type']) && $_SESSION['type']=='image')?$_SESSION['type'].'s/':'').'search';
+        //var_dump($rootUri);
         
         // Construct the full URI for the query.
         $requestUri = $rootUri.'?q='.$q.'&offset='.$offset;
         // construct the key header array
-                $headers = array('Ocp-Apim-Subscription-Key : '.$acctKey);
+        $headers = array('Ocp-Apim-Subscription-Key : '.$acctKey);
         
         //
-                $ch = curl_init($requestUri);
+        $ch = curl_init($requestUri);
 
-                curl_setopt($ch, CURLOPT_URL, $requestUri);
-                curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        curl_setopt($ch, CURLOPT_URL, $requestUri);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $data = curl_exec($ch);
         // json decode
         $this->js2 = json_decode($data);
         //echo '</br></br>Vardumpjs2: ('.$offset.')</br></br>';
-        //var_dump($this->js2->{'webPages'}->{'totalEstimatedMatches'});
+        //var_dump($this->js2->{'totalEstimatedMatches'});
         
         // Set results Flag
-        if (!empty($this->js2->{'webPages'}->{'totalEstimatedMatches'}) > '0')
-        {
-            $this->js2ResultFlag = TRUE;
-        }
-        else 
-        {
-            $this->js2ResultFlag = FALSE;
-        }
+        $this->js2ResultFlag = (!empty($this->js2->{'webPages'}->{'totalEstimatedMatches'}) > '0' || !empty($this->js2->{'totalEstimatedMatches'}) > '0' )?TRUE:FALSE;
         
         // Stores data in a file if required
         //$content = serialize($this->js2);
@@ -1127,17 +1121,31 @@ class formatter
 	public function formatBingJson($results, $offset) {    
         
         if($this->js2ResultFlag == TRUE){
-
-            $j = $results - $offset ;
-            foreach($this->js2->{'webPages'}->{'value'} as $item)
-            {
-                if(!in_array($this->cleanLink($item->{'url'}), $this->resultSet2->returnUrls(), TRUE))
+                        
+            $j = $results - $offset + 1;
+            if(isset($_SESSION['type']) && $_SESSION['type']=='image'){
+                foreach($this->js2->{'value'} as $item)
                 {
-                    $this->resultSet2->addUrl($this->cleanLink($item->{'displayUrl'}));
-                    $this->resultSet2->addTitle($this->cleanText($item->{'name'}));
-                    $this->resultSet2->addSnippet($this->cleanText($item->{'snippet'}));
-                    $this->resultSet2->addScore($j);
-                    $j--;
+                    if(!in_array($this->cleanLink($item->{'contentUrl'}), $this->resultSet2->returnUrls(), TRUE))
+                    {
+                        $this->resultSet2->addUrl($this->cleanLink($item->{'contentUrl'}));
+                        $this->resultSet2->addTitle($this->cleanText($item->{'name'}));
+                        $this->resultSet2->addSnippet($this->cleanText($item->{'name'}));
+                        $this->resultSet2->addScore($j);
+                        $j--;
+                    }
+                }
+            }else{
+                foreach($this->js2->{'webPages'}->{'value'} as $item)
+                {
+                    if(!in_array($this->cleanLink($item->{'displayUrl'}), $this->resultSet2->returnUrls(), TRUE))
+                    {
+                        $this->resultSet2->addUrl($this->cleanLink($item->{'displayUrl'}));
+                        $this->resultSet2->addTitle($this->cleanText($item->{'name'}));
+                        $this->resultSet2->addSnippet($this->cleanText($item->{'snippet'}));
+                        $this->resultSet2->addScore($j);
+                        $j--;
+                    }
                 }
             }
         }   
@@ -1178,6 +1186,7 @@ class formatter
         $resultsCount=count($askResults);
         $one=0;
          $score=0;
+        echo "COUNT ASK :: ".$resultsCount;
         if($resultsCount>0){
             foreach ($askResults as $key => $value) {
                 $this->resultSet3->addUrl($this->cleanLink($value->getLink()));
@@ -1239,20 +1248,29 @@ class formatter
 		
 		$i=0;
 		if($this->$resultSet->returnUrls() != NULL){
-			foreach($this->$resultSet->returnUrls() as $key=>$value)
-			{
-				// Print the details according to the ordered array
-				{
-                    echo '</br>'.'<a href="'.$this->$resultSet->returnUrlsV2($i).'">'.'<strong>#'.($i+$_SESSION['offset']).': '.$this->$resultSet->returnTitlesV2($i).'</strong>'.'</a>';
-					echo '</br>'.'<a href="'.$this->$resultSet->returnUrlsV2($i).'">'.$this->$resultSet->returnUrlsV2($i).'</a>';
-					echo '</br>'.$this->$resultSet->returnSnippetsV2($i);
-					//echo '</br>Score: '.$this->$resultSet->returnScoresV2($i);
-					$i++;
-				}
-			}
+                    if(isset($_SESSION['type']) && $_SESSION['type']=='image'){
+                        foreach($this->$resultSet->returnUrls() as $key=>$value)
+                        {
+                            // Print the details according to the ordered array
+                            echo '</br>'.'<img src="'.$this->$resultSet->returnUrlsV2($i).'">'.$this->$resultSet->returnTitlesV2($i).'</img>';
+                            //echo '</br>'.$this->$resultSet->returnSnippetsV2($i);
+                            //echo '</br>Score: '.$this->$resultSet->returnScoresV2($i);
+                            $i++;
+                        }
+                    }  else {
+                        foreach($this->$resultSet->returnUrls() as $key=>$value)
+                        {
+                            // Print the details according to the ordered array
+                            echo '</br>'.'<a href="'.$this->$resultSet->returnUrlsV2($i).'">'.'<strong>#'.($i+$_SESSION['offset']).': '.$this->$resultSet->returnTitlesV2($i).'</strong>'.'</a>';
+                            echo '</br>'.'<a href="'.$this->$resultSet->returnUrlsV2($i).'">'.$this->$resultSet->returnUrlsV2($i).'</a>';
+                            echo '</br>'.$this->$resultSet->returnSnippetsV2($i);
+                            //echo '</br>Score: '.$this->$resultSet->returnScoresV2($i);
+                            $i++;
+                        }
+                    }
 		}
 		else {
-			echo '</br>Sorry, no results available!';
+                    echo '</br>Sorry, no results available!';
 		}
 	}
 	
@@ -1320,7 +1338,7 @@ class aggregator
 		if ($resultSetFlag2 == TRUE)
 		{
             $count = $resNums<=$resultSet2->returnNumItems() ? $resNums : $resultSet2->returnNumItems();
-           
+            echo "BING COUNT ".$count."<br>";
 			for($i=0; $i<$count;$i++ )
 			{
 				$this->resultSetAgg->addUrl($resultSet2->returnUrlsV2($i));
@@ -1379,7 +1397,8 @@ class aggregator
                     
                    
                     $this->resultSetAgg->sumFusedScores($resultSet1->returnScoresV2($i), $idx, $weight1);
-                    
+                     echo  $resultSet1->returnTitlesV2($i). ' duplicated in google id :: '.$i.'in bing id :: '.$idx." score ".$this->resultSetAgg->returnScoresV2($idx).'<br>';
+
                 }
                 else{
                     $this->resultSetAgg->addUrl($resultSet1->returnUrlsV2($i));
@@ -1404,7 +1423,8 @@ class aggregator
 					if($idx!==false)
                     {
                         $this->resultSetAgg->sumFusedScores($resultSet3->returnScoresV2($i), $idx, $weight3); //
-                       
+                         echo $resultSet3->returnTitlesV2($i)." duplicated in ask id :: ".$i."in bing id :: ".$idx." score :: ".
+                         $this->resultSetAgg->returnScoresV2($idx)."<br>";
 						
 					}
 					else 
@@ -1482,15 +1502,26 @@ class aggregator
 
 		// Iterate the sorted key array
 		$i=0;
-		foreach($this->resultSetAgg->returnUrls() as $item)
-		// Print the details according to the ordered array
-		{
-			echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
-			echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
-			echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]);
-			echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
-			$i++;
-		}
+                if(isset($_SESSION['type']) && $_SESSION['type']=='image'){
+                    foreach($this->resultSetAgg->returnUrls() as $key=>$value)
+                    {
+                        // Print the details according to the ordered array
+                        echo '</br>'.'<img src="'.$this->resultSetAgg->returnUrlsV2($i).'">'.$this->resultSetAgg->returnTitlesV2($i).'</img>';
+                        //echo '</br>'.$this->resultSetAgg->returnSnippetsV2($i);
+                        //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($i);
+                        $i++;
+                    }
+                }  else {
+                    foreach($this->resultSetAgg->returnUrls() as $item)
+                    // Print the details according to the ordered array
+                    {
+                        echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
+                        echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
+                        echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]);
+                        echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
+                        $i++;
+                    }
+                }
 
     }// End of printResultSetAgg()
 	
@@ -1539,16 +1570,26 @@ class aggregator
 		arsort($sortedKeys);
 		$sortedKeys = array_keys($sortedKeys);
 
-		// Iterate the sorted key array
-		for($i=0, $count = count($sortedKeys); $i<$count;$i++)
-		{
-			{
-				echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
-				echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
-				echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]).'</br>';
-				//echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
-			}
-		}
+		$i=0;
+                if(isset($_SESSION['type']) && $_SESSION['type']=='image'){
+                    // Iterate the sorted key array
+                    for($i=0, $count = count($sortedKeys); $i<$count;$i++)
+                    {
+                        // Print the details according to the ordered array
+                        echo '</br>'.'<img src="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</img>';
+                        //echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]);
+                        //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]);
+                    }
+                }  else {
+                    // Iterate the sorted key array
+                    for($i=0, $count = count($sortedKeys); $i<$count;$i++)
+                    {
+                        echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
+                        echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
+                        echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]).'</br>';
+                        //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
+                    }
+                }
     }// End of printResultSetAggCluster()
 	
 	// **********************

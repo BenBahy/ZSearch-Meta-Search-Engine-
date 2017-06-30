@@ -6,6 +6,7 @@ $_SESSION['results'] = (isset($_SESSION['results']) ? $_SESSION['results'] : 10)
 $_SESSION['queryEx'] = (isset($_SESSION['queryEx']) ? $_SESSION['queryEx'] : 'off');
 $_SESSION['thesaurus'] = (isset($_SESSION['thesaurus']) ? $_SESSION['thesaurus'] : 'thesaurus_roget_short.txt');
 $_SESSION['stemmer'] = (isset($_SESSION['stemmer']) ? $_SESSION['stemmer'] : 'off');
+$_SESSION['type'] = (isset($_SESSION['type']) ? $_SESSION['type'] : 'web');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,6 +62,12 @@ $_SESSION['stemmer'] = (isset($_SESSION['stemmer']) ? $_SESSION['stemmer'] : 'of
 				<input name="result_op" type="radio" value="agg" <?php echo ($_SESSION['result_op']== 'agg') ?  'checked' : ''; ?> /> Aggregated</br>
 				<input name="result_op" type="radio" value="nonAgg" <?php echo ($_SESSION['result_op']== 'nonAgg') ?  'checked' : ''; ?> /> Non-Aggregated</br>
 				<input name="result_op" type="radio" value="clustered" <?php echo ($_SESSION['result_op']== 'clustered') ?  'checked' : ''; ?> /> Clustered</br>
+			</div>
+			</br>
+			<hr>
+			<div style = "width: 160px; text-align:left;">
+				<input name="type" type="radio" value="web" <?php echo ($_SESSION['type']== 'web') ?  'checked' : ''; ?> /> web</br>
+				<input name="type" type="radio" value="image" <?php echo ($_SESSION['type']== 'image') ?  'checked' : ''; ?> /> image</br>
 			</div>
 			</br>  
 			

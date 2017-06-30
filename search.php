@@ -7,6 +7,7 @@ $_SESSION['queryEx'] = (isset($_SESSION['queryEx']) ? $_SESSION['queryEx'] : 'of
 $_SESSION['offset'] = (isset($_GET['offset']) ? $_GET['offset'] : 1);
 $_SESSION['query'] = $_GET['q'];
 $_SESSION['thesaurus'] = (isset($_SESSION['thesaurus']) ? $_SESSION['thesaurus'] : 'thesaurus_roget.txt');
+$_SESSION['type'] = (isset($_GET['type']) ? $_GET['type'] : $_SESSION['type']);
 if(!isset($_SESSION['query'])) header("Location: index.php");
 include 'classes.php';
 ?>
@@ -65,21 +66,21 @@ include 'classes.php';
 	<hr>
 <?php
 if ($_SESSION['result_op'] == "nonAgg"){
-echo'<div>
-<ul class = "pager">
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=1">1</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=11">2</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=21">3</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=31">4</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=41">5</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=51">6</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=61">7</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=71">8</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=81">9</a></li>
-<li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=91">10</a></li>
-</ul>
-</div>
-<hr>';
+    echo'<div>
+    <ul class = "pager">
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=1">1</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=11">2</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=21">3</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=31">4</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=41">5</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=51">6</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=61">7</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=71">8</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=81">9</a></li>
+    <li><a href ="search.php?q='; echo $_SESSION['query']; echo'&offset=91">10</a></li>
+    </ul>
+    </div>
+    <hr>';
 }
 ?>
 	<!-- Footer -->

@@ -5,6 +5,7 @@ $_SESSION['results'] = (!isset($_SESSION['results']) ? $_SESSION['results'] : (i
 $_SESSION['queryEx'] = (!isset($_SESSION['queryEx']) ? $_SESSION['queryEx'] : (isset($_GET['queryEx']) ? $_GET['queryEx'] : $_SESSION['queryEx']));
 $_SESSION['thesaurus'] = (!isset($_SESSION['thesaurus']) ? $_SESSION['thesaurus'] : (isset($_GET['thesaurus']) ? $_GET['thesaurus'] : $_SESSION['thesaurus']));
 $_SESSION['stemmer'] = (!isset($_SESSION['stemmer']) ? $_SESSION['stemmer'] : (isset($_GET['stemmer']) ? $_GET['stemmer'] : $_SESSION['stemmer']));
+$_SESSION['type'] = (!isset($_SESSION['type']) ? 'web' : (isset($_GET['type']) ? $_GET['type'] : $_SESSION['type']));
 
 if(!isset($_SESSION['result_op'])) header("Location: index.php");
 include 'classes.php';
@@ -37,9 +38,9 @@ include 'classes.php';
 <!-- Fav and touch icons -->
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-144-precomposed.png">
 <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-114-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-72-precomposed.png">
-				<link rel="apple-touch-icon-precomposed" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-57-precomposed.png">
-							   <link rel="shortcut icon" href="img/favicon.ico">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="http://twitter.github.io/bootstrap/assets/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="img/favicon.ico">
 </head>
 
 <body>
@@ -58,7 +59,12 @@ include 'classes.php';
 		<input name="result_op" type="radio" value="clustered" <?php echo ($_SESSION['result_op']== 'clustered') ?  'checked' : ''; ?> /> Clustered</br>
 		<hr>
 		
-		<label><strong>Select Search Depth (Aggregated & Clustered Results only)</strong></label>
+		<label><strong>Select result Type</strong></label>
+                    <input name="type" type="radio" value="web" <?php echo ($_SESSION['type']== 'web') ?  'checked' : ''; ?> /> web</br>
+                    <input name="type" type="radio" value="image" <?php echo ($_SESSION['type']== 'image') ?  'checked' : ''; ?> /> image</br>
+		<hr>
+
+                <label><strong>Select Search Depth (Aggregated & Clustered Results only)</strong></label>
 		<label>Note: The larger the number the more results you get, but the longer the results will take!</label>
 		<select name="results">
 		<option value="10" <?php echo ($_SESSION['results']== 10) ?  'selected' : ''; ?>>10</option>
