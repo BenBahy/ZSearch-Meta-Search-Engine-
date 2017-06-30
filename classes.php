@@ -11,8 +11,8 @@ class query
 	// **********
 	// PROPERTIES
 	// **********
-	private $queryTokens = array();
-	
+ 	private $queryTokens = array();
+    	private $suggestions=array();	
 	// **********
 	// METHODS
 	// **********
@@ -47,7 +47,7 @@ class query
 	}
 	
 	// Blekko Complex Queries
-	public function complexQueryBlekko($q){
+	public function complexQueryAsk($q){
 
 		$q=str_replace(" OR "," or ",$q);
 		$q=str_replace(' NOT ', ' -', $q);
@@ -71,7 +71,39 @@ class query
 		echo '<strong>> Expansion:</strong> '.$q.'</br>';
 		return $q;
 	}
-	
+
+public function makeSuggestions($q,$thesaurus){
+        $query_suggestions=array();
+        foreach ($this->queryTokens as $keyQ=>$valueQ)
+        {
+            $term_eq=array();
+            foreach($thesaurus as $keyT=>$valueT)
+                if($valueQ == $keyT)
+                {
+                    $term_eq[]=$valueT;
+                }
+            $suggestions[]=$term_eq;
+        }
+        $count=count($this->queryTokens);
+        for($i=0;$i<$count;$i++){
+            $arr=$suggestions[$i];
+            foreach ($arr as $key => $value) {
+                    $old_word=$this->queryTokens[$i];
+                   // $replacement=$old_word." OR ".$value;
+                    $str=str_replace($this->queryTokens[$i], $value, $q);
+                    $query_suggestions[]=$str;
+            }    
+        }
+        echo "<strong> Suggestions :: </strong>".'</br>';
+        $i=0;
+        foreach ($query_suggestions as $key => $value) {
+            if($i++!=0){
+                echo ' , ';
+            }
+            echo' <a href =search.php?q='.urlencode($value).'&result_op='.$_SESSION['result_op'].'>'.$value.'</a>';
+        }
+    }
+    
 	// ******************
 	// Stemmer Functions
 	// ******************
@@ -1185,8 +1217,9 @@ class formatter
     public function addAskResults($askResults){
         $resultsCount=count($askResults);
         $one=0;
-         $score=0;
-        echo "COUNT ASK :: ".$resultsCount;
+        $score=0;
+        //echo "COUNT ASK :: ".$resultsCount;
+        
         if($resultsCount>0){
             foreach ($askResults as $key => $value) {
                 $this->resultSet3->addUrl($this->cleanLink($value->getLink()));
@@ -1338,7 +1371,7 @@ class aggregator
 		if ($resultSetFlag2 == TRUE)
 		{
             $count = $resNums<=$resultSet2->returnNumItems() ? $resNums : $resultSet2->returnNumItems();
-            echo "BING COUNT ".$count."<br>";
+            //echo "BING COUNT ".$count."<br>";
 			for($i=0; $i<$count;$i++ )
 			{
 				$this->resultSetAgg->addUrl($resultSet2->returnUrlsV2($i));
@@ -1506,7 +1539,7 @@ class aggregator
                     foreach($this->resultSetAgg->returnUrls() as $key=>$value)
                     {
                         // Print the details according to the ordered array
-                        echo '</br>'.'<img src="'.$this->resultSetAgg->returnUrlsV2($i).'">'.$this->resultSetAgg->returnTitlesV2($i).'</img>';
+                        echo '</br>'.'<img class="span3" src="'.$this->resultSetAgg->returnUrlsV2($i).'">'.$this->resultSetAgg->returnTitlesV2($i).'</img>';
                         //echo '</br>'.$this->resultSetAgg->returnSnippetsV2($i);
                         //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($i);
                         $i++;
@@ -1550,7 +1583,7 @@ class aggregator
 		// Filter By Clustered Term
 		foreach($this->resultSetAgg->returnSnippets() as $key=>$value)
 		{
-            //replace non words with space
+                        //replace non words with space
 			$value = preg_replace('/[^\w]/', ' ', $value);
 			$value = explode(' ', strtolower($value));
 			
@@ -1576,7 +1609,7 @@ class aggregator
                     for($i=0, $count = count($sortedKeys); $i<$count;$i++)
                     {
                         // Print the details according to the ordered array
-                        echo '</br>'.'<img src="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</img>';
+                        echo '</br>'.'<img class="span3" src="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</img>';
                         //echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]);
                         //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]);
                     }
@@ -1634,16 +1667,25 @@ class aggregator
 		arsort($sortedKeys);
 		$sortedKeys = array_keys($sortedKeys);
 
-		// Iterate the sorted key array
-		for($i=0, $count = count($sortedKeys); $i<$count;$i++)
-		{
-			{
-				echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
-				echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
-				echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]).'</br>';
-				//echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
-			}
-		}
+                if(isset($_SESSION['type']) && $_SESSION['type']=='image'){
+                    // Iterate the sorted key array
+                    for($i=0, $count = count($sortedKeys); $i<$count;$i++)
+                    {
+                        // Print the details according to the ordered array
+                        echo '<img class="span3" src="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</img>';
+                        //echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]);
+                        //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]);
+                    }
+                }  else {
+                    // Iterate the sorted key array
+                    for($i=0, $count = count($sortedKeys); $i<$count;$i++)
+                    {
+                        echo '</br><strong>#'.($i+1).': '.$this->resultSetAgg->returnTitlesV2($sortedKeys[$i]).'</strong>';
+                        echo '</br>'.'<a href="'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'">'.$this->resultSetAgg->returnUrlsV2($sortedKeys[$i]).'</a>';
+                        echo '</br>'.$this->resultSetAgg->returnSnippetsV2($sortedKeys[$i]).'</br>';
+                        //echo '</br>Score: '.$this->resultSetAgg->returnScoresV2($sortedKeys[$i]).'</br>';
+                    }
+                }
     }// End of printResultSetAggBinCluster()
 	
 	// Output Result Set to File
